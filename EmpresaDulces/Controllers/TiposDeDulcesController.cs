@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿//Creacion del controlador TiposDeDulcesController
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmpresaDulces.Controllers
