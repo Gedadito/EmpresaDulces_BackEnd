@@ -1,4 +1,6 @@
-﻿namespace EmpresaDulces
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace EmpresaDulces
 {
     public class Startup
     {
@@ -12,6 +14,9 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddDbContext<AplicationDbContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
