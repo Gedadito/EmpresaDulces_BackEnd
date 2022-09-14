@@ -1,84 +1,24 @@
 ﻿//Creacion del controlador TiposDeDulcesController
-using Microsoft.AspNetCore.Http;
+
+using EmpresaDulces.Entidades;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmpresaDulces.Controllers
 {
-    public class TiposDeDulcesController : Controller
+    [ApiController]
+    [Route("EmpresaDulces")]
+    public class TiposDeDulcesController : ControllerBase
     {
-        // GET: TiposDeDulcesController
-        public ActionResult Index()
+        [HttpGet]
+        
+        public ActionResult<List<Dulces>> Get()
         {
-            return View();
-        }
-
-        // GET: TiposDeDulcesController/Details/5
-        public ActionResult Details(int id)
-        {
-            return View();
-        }
-
-        // GET: TiposDeDulcesController/Create
-        public ActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: TiposDeDulcesController/Create
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Create(IFormCollection collection)
-        {
-            try
+            return new List<Dulces>()
             {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
+                new Dulces() { Id = 1, NombreDelDulce = "Lucas Muecas"},
+                new Dulces() { Id = 2, NombreDelDulce = "TutsiPop" }
+            };
         }
-
-        // GET: TiposDeDulcesController/Edit/5
-        public ActionResult Edit(int id)
-        {
-            return View();
-        }
-
-        // POST: TiposDeDulcesController/Edit/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Edit(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
-
-        // GET: TiposDeDulcesController/Delete/5
-        public ActionResult Delete(int id)
-        {
-            return View();
-        }
-
-        // POST: TiposDeDulcesController/Delete/5
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public ActionResult Delete(int id, IFormCollection collection)
-        {
-            try
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            catch
-            {
-                return View();
-            }
-        }
+        
     }
 }
