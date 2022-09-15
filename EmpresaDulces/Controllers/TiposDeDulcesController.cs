@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EmpresaDulces.Controllers
 {
     [ApiController]
-    [Route("EmpresaDulces")]
+    [Route("TipoDulces")]
     public class TiposDeDulcesController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -23,7 +23,7 @@ namespace EmpresaDulces.Controllers
         public async Task<ActionResult<List<Dulces>>> Get()
         {
 
-            return await dbContext.TipoDulce.ToListAsync();
+            return await dbContext.TipoDulce.Include(x => x.InfoDulce).ToListAsync();
 
         }
 
@@ -54,7 +54,7 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult> Delete(int id)
         {
-            var exist = await dbContext.TipoDulce.AnyAsync(n => n.Id == id);
+            var exist = await dbContext.TipoDulce.AnyAsync(x => x.Id == id);
             if (!exist)
             {
                 return NotFound();

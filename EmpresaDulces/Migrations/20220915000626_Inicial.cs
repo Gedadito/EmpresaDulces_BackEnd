@@ -20,6 +20,8 @@ namespace EmpresaDulces.Migrations
                 {
                     table.PrimaryKey("PK_TipoDulce", x => x.Id);
                 });
+
+
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

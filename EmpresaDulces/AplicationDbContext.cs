@@ -11,5 +11,7 @@ namespace EmpresaDulces
         }
 
         public DbSet<Dulces> TipoDulce { get; set; }
+
+        public DbSet<InformacionDulce> InfoDulce { get; set; }  
     }
 }
