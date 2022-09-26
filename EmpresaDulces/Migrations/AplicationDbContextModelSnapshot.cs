@@ -35,7 +35,7 @@ namespace EmpresaDulces.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TipoDulce");
+                    b.ToTable("Dulces");
                 });
 
             modelBuilder.Entity("EmpresaDulces.Entidades.InformacionDulce", b =>
@@ -55,14 +55,11 @@ namespace EmpresaDulces.Migrations
                     b.Property<string>("MarcaDeDulce")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NombreDelDulce")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DulcesId");
 
-                    b.ToTable("InfoDulce");
+                    b.ToTable("InformacionDulces");
                 });
 
             modelBuilder.Entity("EmpresaDulces.Entidades.InformacionDulce", b =>

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EmpresaDulces.Controllers
 {
     [ApiController]
-    [Route("TipoDulces")]
+    [Route("/tipoDulces")]
     public class TiposDeDulcesController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -19,12 +19,18 @@ namespace EmpresaDulces.Controllers
 
 
         [HttpGet]
-        
+
         public async Task<ActionResult<List<Dulces>>> Get()
         {
 
-            return await dbContext.TipoDulce.Include(x => x.InfoDulce).ToListAsync();
+            return await dbContext.Dulces.Include(x => x.InfoDulce).ToListAsync();
 
+        }
+
+        [HttpGet("primerDulce")]
+        public async Task<ActionResult<Dulces>> PrimerDulce()
+        {
+            return await dbContext.Dulces.FirstOrDefaultAsync();
         }
 
         [HttpPost]
@@ -54,7 +60,7 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult> Delete(int id)
         {
-            var exist = await dbContext.TipoDulce.AnyAsync(x => x.Id == id);
+            var exist = await dbContext.Dulces.AnyAsync(x => x.Id == id);
             if (!exist)
             {
                 return NotFound();

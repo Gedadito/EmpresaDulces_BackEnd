@@ -4,41 +4,56 @@
 
 namespace EmpresaDulces.Migrations
 {
-    public partial class InfoDulce : Migration
+    public partial class Dulcezz : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "InfoDulce",
+                name: "Dulces",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    NombreDelDulce = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NombreDelDulce = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Dulces", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "InformacionDulces",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     MarcaDeDulce = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     DulceId = table.Column<int>(type: "int", nullable: false),
                     DulcesId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InfoDulce", x => x.Id);
+                    table.PrimaryKey("PK_InformacionDulces", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InfoDulce_TipoDulce_DulcesId",
+                        name: "FK_InformacionDulces_Dulces_DulcesId",
                         column: x => x.DulcesId,
-                        principalTable: "TipoDulce",
+                        principalTable: "Dulces",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_InfoDulce_DulcesId",
-                table: "InfoDulce",
+                name: "IX_InformacionDulces_DulcesId",
+                table: "InformacionDulces",
                 column: "DulcesId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "InfoDulce");
+                name: "InformacionDulces");
+
+            migrationBuilder.DropTable(
+                name: "Dulces");
         }
     }
 }

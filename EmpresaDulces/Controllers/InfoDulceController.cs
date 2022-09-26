@@ -1,5 +1,5 @@
 ﻿using EmpresaDulces.Entidades;
-using EmpresaDulces.Migrations;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,7 +7,7 @@ namespace EmpresaDulces.Controllers
 {
 
     [ApiController]
-    [Route("InfoDulces")]
+    [Route("/infoDulces")]
     public class InfoDulceController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -21,7 +21,7 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult<List<InformacionDulce>>> GetAll()
         {
-            return await dbContext.InfoDulce.ToListAsync();
+            return await dbContext.InformacionDulces.ToListAsync();
 
         }
 
@@ -29,18 +29,18 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult<InformacionDulce>> GetById(int id)
         {
-            return await dbContext.InfoDulce.FirstOrDefaultAsync(x => x.Id == id);
+            return await dbContext.InformacionDulces.FirstOrDefaultAsync(x => x.Id == id);
         }
 
         [HttpPost]
 
         public async Task<ActionResult> Post(InformacionDulce dulce)
         {
-            var existeDulce = await dbContext.InfoDulce.AnyAsync(x => x.Id == dulce.DulceId);
+            var existeDulce = await dbContext.Dulces.AnyAsync(x => x.Id == dulce.DulceId);
 
             if (!existeDulce)
             {
-                return BadRequest($"No existe dulce con id; {dulce.DulceId} ");
+                return BadRequest($"No existe dulce con id: {dulce.DulceId} ");
             }
 
             dbContext.Add(dulce);
@@ -52,7 +52,7 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult> Put(InformacionDulce dulce, int id)
         {
-            var exist = await dbContext.InfoDulce.AnyAsync(x => x.Id == id);
+            var exist = await dbContext.InformacionDulces.AnyAsync(x => x.Id == id);
 
             if (!exist)
             {
@@ -73,7 +73,7 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult> Delete(int id)
         {
-            var exist = await dbContext.InfoDulce.AnyAsync(x => x.Id==id);
+            var exist = await dbContext.InformacionDulces.AnyAsync(x => x.Id==id);
 
             if (!exist)
             {
