@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EmpresaDulces.Controllers
 {
     [ApiController]
-    [Route("/tipoDulces")]
+    [Route("api/tipoDulces")]
     public class TiposDeDulcesController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -18,7 +18,9 @@ namespace EmpresaDulces.Controllers
         }
 
 
-        [HttpGet]
+        [HttpGet]               // Ruta sin especificar, solo arroja lista api/tipoDulces
+        [HttpGet("/listadoDeDulces-ID-Nombre")]  // /listadoDeDulces-ID-Nombre
+        [HttpGet("listadoDeDulces-ID-Nombre")]  // api/tipoDulces/listadoDeDulces-ID-Nombre
 
         public async Task<ActionResult<List<Dulces>>> Get()
         {
@@ -33,6 +35,33 @@ namespace EmpresaDulces.Controllers
             return await dbContext.Dulces.FirstOrDefaultAsync();
         }
 
+        [HttpGet("{id:int}")]
+
+        public async Task<ActionResult<Dulces>> Get(int id)
+        {
+            var dulce = await dbContext.Dulces.FirstOrDefaultAsync(x => x.Id == id); 
+            
+            if(dulce == null)
+            {
+                return NotFound();
+            }
+            return dulce;
+        }
+
+        [HttpGet("{nombre}")]
+
+        public async Task<ActionResult<Dulces>> Get(string nombre)
+        {
+            var dulce = await dbContext.Dulces.FirstOrDefaultAsync(x => x.NombreDelDulce.Contains(nombre));
+
+            if(dulce == null)
+            {
+                return NotFound();
+            }
+
+            return dulce;
+        }
+
         [HttpPost]
 
         public async Task<ActionResult> Post(Dulces dulce)
@@ -42,6 +71,7 @@ namespace EmpresaDulces.Controllers
             return Ok();
         }
 
+   
         [HttpPut("{id:int}")]
 
         public async Task<ActionResult> Put(Dulces dulce, int id)
@@ -56,6 +86,7 @@ namespace EmpresaDulces.Controllers
             return Ok();
         }
 
+       
         [HttpDelete("{id:int}")]
 
         public async Task<ActionResult> Delete(int id)

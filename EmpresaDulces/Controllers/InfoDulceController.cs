@@ -7,7 +7,7 @@ namespace EmpresaDulces.Controllers
 {
 
     [ApiController]
-    [Route("/infoDulces")]
+    [Route("api/infoDulces")]
     public class InfoDulceController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -18,6 +18,8 @@ namespace EmpresaDulces.Controllers
         }
 
         [HttpGet]
+        [HttpGet("listadoDeDulces-Marca-ID")]
+        [HttpGet("/listadoDeDulces-Marca-ID")]
 
         public async Task<ActionResult<List<InformacionDulce>>> GetAll()
         {
@@ -30,6 +32,20 @@ namespace EmpresaDulces.Controllers
         public async Task<ActionResult<InformacionDulce>> GetById(int id)
         {
             return await dbContext.InformacionDulces.FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        [HttpGet("{nombre}")]
+
+        public async Task<ActionResult<InformacionDulce>> Get(string nombre)
+        {
+            var dulce = await dbContext.InformacionDulces.FirstOrDefaultAsync(x => x.MarcaDeDulce.Contains(nombre));
+
+            if (dulce == null)
+            {
+                return NotFound();
+            }
+
+            return dulce;
         }
 
         [HttpPost]
@@ -48,6 +64,7 @@ namespace EmpresaDulces.Controllers
             return Ok();
         }
 
+       
         [HttpPut("{id:int}")]
 
         public async Task<ActionResult> Put(InformacionDulce dulce, int id)
@@ -69,6 +86,7 @@ namespace EmpresaDulces.Controllers
             return Ok();
         }
 
+        
         [HttpDelete("{id:int}")]
 
         public async Task<ActionResult> Delete(int id)
