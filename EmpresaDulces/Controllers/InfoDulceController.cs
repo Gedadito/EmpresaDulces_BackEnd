@@ -2,6 +2,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using EmpresaDulces.Services;
 
 namespace EmpresaDulces.Controllers
 {
@@ -11,19 +12,49 @@ namespace EmpresaDulces.Controllers
     public class InfoDulceController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
+        private readonly IService service;
+        private readonly ServiceTransient serviceTransient;
+        private readonly ServiceScoped serviceScoped;
+        private readonly ServiceSingleton serviceSingleton;
+        private readonly ILogger<InfoDulceController> logger;
 
-        public InfoDulceController(AplicationDbContext context)
+        public InfoDulceController(AplicationDbContext context, IService service,
+            ServiceTransient serviceTransient, ServiceScoped serviceScoped,
+            ServiceSingleton serviceSingleton, ILogger<InfoDulceController> logger)
         {
             this.dbContext = context;
+            this.service = service;
+            this.serviceTransient = serviceTransient;
+            this.serviceScoped = serviceScoped;
+            this.serviceSingleton = serviceSingleton;
+            this.logger = logger;
+        }
+
+        [HttpGet("GUID")]
+
+        public ActionResult ObtenerGuid()
+        {
+            return Ok(new
+            {
+                InfoDulceControllerTransient = serviceTransient.guid,
+                ServiceA_Transient = service.GetTransient(),
+                InfoDulceControllerScoped = serviceScoped.guid,
+                ServiceA_Scoped = service.GetScoped(),
+                InfoDulceControllerSingleton = serviceSingleton.guid,
+                ServiceA_Singleton = service.GetSingleton()
+            });
         }
 
         [HttpGet]
         [HttpGet("listadoDeDulces-Marca-ID")]
         [HttpGet("/listadoDeDulces-Marca-ID")]
 
-        public async Task<ActionResult<List<InformacionDulce>>> GetAll()
+        public async Task<ActionResult<List<InformacionDulce>>> Get()
         {
-            return await dbContext.InformacionDulces.ToListAsync();
+            logger.LogInformation("Se obtiene el listado de dulces");
+            logger.LogWarning("Prueba waring");
+            service.EjecutarJob();
+            return await dbContext.InformacionDulces.Include(x => x.Sabor).ToListAsync();
 
         }
 
@@ -50,13 +81,15 @@ namespace EmpresaDulces.Controllers
 
         [HttpPost]
 
-        public async Task<ActionResult> Post(InformacionDulce dulce)
+        public async Task<ActionResult> Post([FromBody]InformacionDulce dulce)
         {
-            var existeDulce = await dbContext.Dulces.AnyAsync(x => x.Id == dulce.DulceId);
+            //Ejemplo para validar desde el controlador haciendo uso de la BD con ayuda del dbContext
 
-            if (!existeDulce)
+            var existeDulceMismaMarca = await dbContext.InformacionDulces.AnyAsync(x => x.MarcaDeDulce == dulce.MarcaDeDulce);
+
+            if (existeDulceMismaMarca)
             {
-                return BadRequest($"No existe dulce con id: {dulce.DulceId} ");
+                return BadRequest("Ya existe dulce con esa Marca");
             }
 
             dbContext.Add(dulce);
