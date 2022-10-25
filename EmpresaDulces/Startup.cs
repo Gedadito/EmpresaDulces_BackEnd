@@ -1,8 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text.Json.Serialization;
 using EmpresaDulces.Services;
 using Microsoft.OpenApi.Models;
 using EmpresaDulces.Middlewares;
+using EmpresaDulces.Filtros;
 
 namespace EmpresaDulces
 {
@@ -17,7 +19,10 @@ namespace EmpresaDulces
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers().AddJsonOptions(x =>
+            services.AddControllers(opciones =>
+            {
+                opciones.Filters.Add(typeof(FiltroDeDulcesExcepcion));
+            }).AddJsonOptions(x =>
             x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
            
             // Se encarga de configurar ApplicationDbContext como un servicio
@@ -38,7 +43,10 @@ namespace EmpresaDulces
             //todos los usuarios que hagan una petición van a tener la misma info compartida entre todos 
             //services.AddSingleton<IService, ServiceA>();
             services.AddSingleton<ServiceSingleton>();
-
+            services.AddHostedService<EscribirEnArchivoDulces>();
+            services.AddResponseCaching();
+            services.AddTransient<FiltroDeDulcesAccion>();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen(c =>
             {
@@ -105,6 +113,8 @@ namespace EmpresaDulces
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseResponseCaching();
 
             app.UseAuthorization();
 

@@ -3,12 +3,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EmpresaDulces.Services;
+using Microsoft.AspNetCore.Authorization;
+using EmpresaDulces.Filtros;
 
 namespace EmpresaDulces.Controllers
 {
 
     [ApiController]
     [Route("api/infoDulces")]
+    //[Authorize]
     public class InfoDulceController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -31,9 +34,17 @@ namespace EmpresaDulces.Controllers
         }
 
         [HttpGet("GUID")]
+        [ResponseCache(Duration = 8)]
+        //Se pueden utilizar filtros para acci0n que requiramos :D
+        [ServiceFilter(typeof(FiltroDeDulcesAccion))]
+        //[Authorize] Nos permite proteger nuestros metodos a las personas que no tengan el acceso concedido
+        //[Authorize]
+
 
         public ActionResult ObtenerGuid()
         {
+            logger.LogInformation("Durante la ejecucion del filtro de dulce accion");
+
             return Ok(new
             {
                 InfoDulceControllerTransient = serviceTransient.guid,
@@ -51,6 +62,7 @@ namespace EmpresaDulces.Controllers
 
         public async Task<ActionResult<List<InformacionDulce>>> Get()
         {
+            throw new NotImplementedException();
             logger.LogInformation("Se obtiene el listado de dulces");
             logger.LogWarning("Prueba waring");
             service.EjecutarJob();
