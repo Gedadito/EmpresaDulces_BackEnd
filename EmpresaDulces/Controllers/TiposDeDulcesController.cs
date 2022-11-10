@@ -1,5 +1,7 @@
 ﻿//Creacion del controlador TiposDeDulcesController
 
+using AutoMapper;
+using EmpresaDulces.DTOs;
 using EmpresaDulces.Entidades;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,61 +13,35 @@ namespace EmpresaDulces.Controllers
     public class TiposDeDulcesController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
+        private readonly IMapper mapper;
 
-        public TiposDeDulcesController(AplicationDbContext dbContext)
+        public TiposDeDulcesController(AplicationDbContext dbContext, IMapper mapper)
         {
             this.dbContext = dbContext;
+            this.mapper = mapper;
         }
 
 
-        [HttpGet]               // Ruta sin especificar, solo arroja lista api/tipoDulces
-        [HttpGet("/listadoDeDulces-ID-Nombre")]  // /listadoDeDulces-ID-Nombre
-        [HttpGet("listadoDeDulces-ID-Nombre")]  // api/tipoDulces/listadoDeDulces-ID-Nombre
-
-        public async Task<ActionResult<List<Dulces>>> Get()
-        {
-
-            return await dbContext.Dulces.Include(x => x.InfoDulce).ToListAsync();
-
-        }
-
-        [HttpGet("primerDulce")]
-        public async Task<ActionResult<Dulces>> PrimerDulce()
-        {
-            return await dbContext.Dulces.FirstOrDefaultAsync();
-        }
 
         [HttpGet("{id:int}")]
 
-        public async Task<ActionResult<Dulces>> Get(int id)
+        public async Task<ActionResult<TiposDeDulcesDTO>> Get(int id)
         {
-            var dulce = await dbContext.Dulces.FirstOrDefaultAsync(x => x.Id == id); 
-            
-            if(dulce == null)
-            {
-                return NotFound();
-            }
-            return dulce;
+            var dulce = await dbContext.Dulces
+                .Include(dulcesDB => dulcesDB.DulceInfos)
+                .ThenInclude(dulceInfoDB => dulceInfoDB.InformacionDulce)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            return mapper.Map<TiposDeDulcesDTO>(dulce);
+          
         }
 
-        [HttpGet("{nombre}")]
-
-        public async Task<ActionResult<Dulces>> Get(string nombre)
-        {
-            var dulce = await dbContext.Dulces.FirstOrDefaultAsync(x => x.NombreDelDulce.Contains(nombre));
-
-            if(dulce == null)
-            {
-                return NotFound();
-            }
-
-            return dulce;
-        }
-
+       
         [HttpPost]
 
-        public async Task<ActionResult> Post(Dulces dulce)
+        public async Task<ActionResult> Post(TiposDeDulcesCreacionDTO tiposDeDulcesCreacionDTO)
         {
+            var dulce = mapper.Map<Dulces>(tiposDeDulcesCreacionDTO);
+
             dbContext.Add(dulce);
             await dbContext.SaveChangesAsync();
             return Ok();

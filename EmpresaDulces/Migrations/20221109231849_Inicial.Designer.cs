@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmpresaDulces.Migrations
 {
     [DbContext(typeof(AplicationDbContext))]
-    [Migration("20220923034202_Dulcezz")]
-    partial class Dulcezz
+    [Migration("20221109231849_Inicial")]
+    partial class Inicial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -33,7 +33,9 @@ namespace EmpresaDulces.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("NombreDelDulce")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.HasKey("Id");
 
@@ -48,26 +50,43 @@ namespace EmpresaDulces.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<int>("DulceId")
+                    b.Property<string>("MarcaDeDulce")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("InformacionDulces");
+                });
+
+            modelBuilder.Entity("EmpresaDulces.Entidades.Sabor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<int?>("DulcesId")
                         .HasColumnType("int");
 
-                    b.Property<string>("MarcaDeDulce")
+                    b.Property<string>("Taste")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TasteId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("DulcesId");
 
-                    b.ToTable("InformacionDulces");
+                    b.ToTable("Sabores");
                 });
 
-            modelBuilder.Entity("EmpresaDulces.Entidades.InformacionDulce", b =>
+            modelBuilder.Entity("EmpresaDulces.Entidades.Sabor", b =>
                 {
                     b.HasOne("EmpresaDulces.Entidades.Dulces", "Dulces")
-                        .WithMany("InfoDulce")
+                        .WithMany("Sabores")
                         .HasForeignKey("DulcesId");
 
                     b.Navigation("Dulces");
@@ -75,7 +94,7 @@ namespace EmpresaDulces.Migrations
 
             modelBuilder.Entity("EmpresaDulces.Entidades.Dulces", b =>
                 {
-                    b.Navigation("InfoDulce");
+                    b.Navigation("Sabores");
                 });
 #pragma warning restore 612, 618
         }

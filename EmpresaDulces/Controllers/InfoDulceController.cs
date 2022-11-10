@@ -2,109 +2,81 @@
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using EmpresaDulces.Services;
+
 using Microsoft.AspNetCore.Authorization;
 using EmpresaDulces.Filtros;
+using EmpresaDulces.DTOs;
+using AutoMapper;
 
 namespace EmpresaDulces.Controllers
 {
 
     [ApiController]
     [Route("api/infoDulces")]
-    //[Authorize]
+    
     public class InfoDulceController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
-        private readonly IService service;
-        private readonly ServiceTransient serviceTransient;
-        private readonly ServiceScoped serviceScoped;
-        private readonly ServiceSingleton serviceSingleton;
-        private readonly ILogger<InfoDulceController> logger;
+        private readonly IMapper mapper;
 
-        public InfoDulceController(AplicationDbContext context, IService service,
-            ServiceTransient serviceTransient, ServiceScoped serviceScoped,
-            ServiceSingleton serviceSingleton, ILogger<InfoDulceController> logger)
+        public InfoDulceController(AplicationDbContext context, IMapper mapper)
         {
             this.dbContext = context;
-            this.service = service;
-            this.serviceTransient = serviceTransient;
-            this.serviceScoped = serviceScoped;
-            this.serviceSingleton = serviceSingleton;
-            this.logger = logger;
-        }
-
-        [HttpGet("GUID")]
-        [ResponseCache(Duration = 8)]
-        //Se pueden utilizar filtros para acci0n que requiramos :D
-        [ServiceFilter(typeof(FiltroDeDulcesAccion))]
-        //[Authorize] Nos permite proteger nuestros metodos a las personas que no tengan el acceso concedido
-        //[Authorize]
-
-
-        public ActionResult ObtenerGuid()
-        {
-            logger.LogInformation("Durante la ejecucion del filtro de dulce accion");
-
-            return Ok(new
-            {
-                InfoDulceControllerTransient = serviceTransient.guid,
-                ServiceA_Transient = service.GetTransient(),
-                InfoDulceControllerScoped = serviceScoped.guid,
-                ServiceA_Scoped = service.GetScoped(),
-                InfoDulceControllerSingleton = serviceSingleton.guid,
-                ServiceA_Singleton = service.GetSingleton()
-            });
+            this.mapper = mapper;
         }
 
         [HttpGet]
-        [HttpGet("listadoDeDulces-Marca-ID")]
-        [HttpGet("/listadoDeDulces-Marca-ID")]
-
-        public async Task<ActionResult<List<InformacionDulce>>> Get()
+        public async Task<List<InfoDulceDTO>> Get()
         {
-            throw new NotImplementedException();
-            logger.LogInformation("Se obtiene el listado de dulces");
-            logger.LogWarning("Prueba waring");
-            service.EjecutarJob();
-            return await dbContext.InformacionDulces.Include(x => x.Sabor).ToListAsync();
+            
+            var dulces = await dbContext.InformacionDulces.ToListAsync();
+            return mapper.Map<List<InfoDulceDTO>>(dulces);
 
         }
 
         [HttpGet("{id:int}")]
 
-        public async Task<ActionResult<InformacionDulce>> GetById(int id)
+        public async Task<ActionResult<InfoDulceDTO>> Get(int id)
         {
-            return await dbContext.InformacionDulces.FirstOrDefaultAsync(x => x.Id == id);
-        }
-
-        [HttpGet("{nombre}")]
-
-        public async Task<ActionResult<InformacionDulce>> Get(string nombre)
-        {
-            var dulce = await dbContext.InformacionDulces.FirstOrDefaultAsync(x => x.MarcaDeDulce.Contains(nombre));
+            var dulce = await dbContext.InformacionDulces.FirstOrDefaultAsync(x => x.Id == id);
 
             if (dulce == null)
             {
                 return NotFound();
             }
 
-            return dulce;
+            return mapper.Map<InfoDulceDTO>(dulce);
+        }
+
+        [HttpGet("{nombre}")]
+
+        public async Task<ActionResult<List<InfoDulceDTO>>> Get(string nombre)
+        {
+            var dulces = await dbContext.InformacionDulces.Where(x => x.MarcaDeDulce.Contains(nombre)).ToListAsync();
+
+            return mapper.Map<List<InfoDulceDTO>>(dulces);
         }
 
         [HttpPost]
 
-        public async Task<ActionResult> Post([FromBody]InformacionDulce dulce)
+        public async Task<ActionResult> Post([FromBody] InfoDulceCreacionDTO infoDulceCreacionDTO)
         {
-            //Ejemplo para validar desde el controlador haciendo uso de la BD con ayuda del dbContext
-
-            var existeDulceMismaMarca = await dbContext.InformacionDulces.AnyAsync(x => x.MarcaDeDulce == dulce.MarcaDeDulce);
-
-            if (existeDulceMismaMarca)
+            if(infoDulceCreacionDTO.MarcaId == null)
             {
-                return BadRequest("Ya existe dulce con esa Marca");
+                return BadRequest("No se puede");
             }
 
-            dbContext.Add(dulce);
+            var marcasId = await dbContext.InformacionDulces.
+                Where(marcaBD => infoDulceCreacionDTO.MarcaId.Contains(marcaBD.Id)).Select(x => x.Id).ToListAsync();
+
+            if(infoDulceCreacionDTO.MarcaId.Count != marcasId.Count)
+            {
+                return BadRequest("No existe");
+            }
+
+            var marcaDulce = mapper.Map<InformacionDulce>(infoDulceCreacionDTO);
+
+            dbContext.Add(marcaDulce);
             await dbContext.SaveChangesAsync();
             return Ok();
         }
@@ -121,7 +93,7 @@ namespace EmpresaDulces.Controllers
                 return NotFound("El dulce no existe");
             }
 
-            if (dulce.DulceId == id)
+            if (dulce.Id != id)
             {
                 return BadRequest("El id del dulce no coincide");
             }
