@@ -7,13 +7,15 @@ using Microsoft.AspNetCore.Authorization;
 using EmpresaDulces.Filtros;
 using EmpresaDulces.DTOs;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace EmpresaDulces.Controllers
 {
 
     [ApiController]
     [Route("api/infoDulces")]
-    
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "EsAdmin")]
+
     public class InfoDulceController : ControllerBase
     {
         private readonly AplicationDbContext dbContext;
@@ -26,11 +28,12 @@ namespace EmpresaDulces.Controllers
         }
 
         [HttpGet]
-        public async Task<List<InfoDulceDTO>> Get()
+        [AllowAnonymous]
+        public async Task<List<TiposDeDulcesDTO>> Get()
         {
             
             var dulces = await dbContext.InformacionDulces.ToListAsync();
-            return mapper.Map<List<InfoDulceDTO>>(dulces);
+            return mapper.Map<List<TiposDeDulcesDTO>>(dulces);
 
         }
 

@@ -5,6 +5,10 @@ using System.Text.Json.Serialization;
 using Microsoft.OpenApi.Models;
 using EmpresaDulces.Middlewares;
 using EmpresaDulces.Filtros;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace EmpresaDulces
 {
@@ -12,6 +16,7 @@ namespace EmpresaDulces
     {
         public Startup(IConfiguration configuration)
         {
+            JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.Clear();
             Configuration = configuration;
         }
 
@@ -30,14 +35,65 @@ namespace EmpresaDulces
             options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
-            //services.AddEndpointsApiExplorer();
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                            .AddJwtBearer(opciones => opciones.TokenValidationParameters = new TokenValidationParameters
+                            {
+                                ValidateIssuer = false,
+                                ValidateAudience = false,
+                                ValidateLifetime = false,
+                                ValidateIssuerSigningKey = true,
+                                IssuerSigningKey = new SymmetricSecurityKey(
+                                    Encoding.UTF8.GetBytes(Configuration["llavejwt"])),
+                                ClockSkew = TimeSpan.Zero
+                            });
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EmpresaDulces", Version = "v1" });
+
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    In = ParameterLocation.Header
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id ="Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
+
             });
 
             services.AddAutoMapper(typeof(Startup));
+
+            services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddEntityFrameworkStores<AplicationDbContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthorization(opciones =>
+            {
+                opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin"));
+            });
+
+            services.AddCors(opciones =>
+            {
+                opciones.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://apirequest.io").AllowAnyMethod().AllowAnyHeader();
+                });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
@@ -94,7 +150,7 @@ namespace EmpresaDulces
 
             app.UseRouting();
 
-      
+            app.UseCors();
 
             app.UseAuthorization();
 
